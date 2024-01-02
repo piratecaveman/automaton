@@ -1,0 +1,10 @@
+- name: Pre Init Phase
+  hosts: kubenet
+  become: true
+  become_method: ansible.builtin.sudo
+  vars:
+    kube_user: kube
+    kube_password: $6$JhFD/LMu9i6cEXEe$lODyKQ.zYHzin.67yMn/IZljTfKGB7dKpQB5lxrA2W1gzj9F2ZoVf05kdfoZXn6gz/fYTBX3KC8Q6dFzbmnrA0
+  roles:
+    - system_config
+    - packages

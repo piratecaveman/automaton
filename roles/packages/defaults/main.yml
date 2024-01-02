@@ -1,0 +1,6 @@
+packages_names:
+  - acl
+  - apt-transport-https
+  - htop
+  - net-tools
+  - vim

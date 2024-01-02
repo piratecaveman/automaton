@@ -1,0 +1,44 @@
+- name: Install prerequisite packages for HAProxy
+  ansible.builtin.apt:
+    name: '{{ load_balancer_hap_prerequisite_packages }}'
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Add PPA for HAProxy
+  ansible.builtin.apt_repository:
+    repo: 'ppa:vbernat/haproxy-{{ load_balancer_hap_lts_version }}'
+    state: present
+    update_cache: true
+
+- name: Install HAProxy package
+  ansible.builtin.apt:
+    name:
+      - haproxy
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Generate HAProxy configuration
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: /tmp/hap.cfg
+    mode: '0644'
+  changed_when: true
+
+- name: Verify HAProxy configuration
+  ansible.builtin.command:
+    cmd: /usr/sbin/haproxy -f /tmp/hap.cfg -c
+  register: haproxy_validity
+  failed_when: haproxy_validity.rc != 0
+  changed_when: true
+
+- name: Apply HAProxy configuration
+  ansible.builtin.copy:
+    dest: /etc/haproxy/haproxy.cfg
+    src: /tmp/hap.cfg
+    remote_src: true
+    mode: '0644'
+  changed_when: true
+  when: haproxy_validity.rc == 0
+  notify: restart_haproxy

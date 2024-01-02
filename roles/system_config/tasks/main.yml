@@ -1,0 +1,85 @@
+- name: Load Kernel Modules
+  block:
+    - name: Load overlay module (1/2)
+      community.general.modprobe:
+        name: overlay
+        state: present
+        persistent: present
+
+    - name: Load br_netfilter module (2/2)
+      community.general.modprobe:
+        name: br_netfilter
+        state: present
+        persistent: present
+
+- name: Tune System Parameters
+  block:
+    - name: Setup nf-call-iptables (1/3)
+      ansible.posix.sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+        sysctl_set: true
+        reload: true
+        sysctl_file: /etc/sysctl.d/10-bridge-nf-call-iptables.conf
+
+    - name: Setup nf-call-ip6tables (2/3)
+      ansible.posix.sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+        state: present
+        reload: true
+        sysctl_set: true
+        sysctl_file: /etc/sysctl.d/10-bridge-nf-call-ip6tables.conf
+
+    - name: Setup ip_forward (3/3)
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: true
+        sysctl_set: true
+        sysctl_file: /etc/sysctl.d/10-ip-forward.conf
+
+- name: Disable swap
+  block:
+    - name: Detect if swap is enabled (1/1)
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          [[ -z $(swapon --show) ]]
+        executable: /bin/bash
+      changed_when: true
+      register: swapon_output
+
+    - name: Disable swap (2/2)
+      become: true
+      ansible.builtin.command:
+        cmd: swapoff -a
+      changed_when: true
+      when:
+        - swapon_output.rc != 0
+
+- name: Create a user for kubernetes adminisration
+  block:
+    - name: Create kube user (1/2)
+      ansible.builtin.user:
+        name: '{{ kube_user | default(system_config_kube_user) }}'
+        shell: /bin/bash
+        create_home: true
+        state: present
+        password: '{{ kube_password | default(system_config_kube_user_password) }}'
+
+    - name: Setup sudo access (2/2)
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/10_'{{ kube_user | default(system_config_kube_user) }}'
+        mode: '0644'
+        content: |
+          {{ kube_user | default(system_config_kube_user) }} ALL=(ALL) NOPASSWD: ALL
+        validate: 'visudo -cf %s'
+
+- name: Remove snap packages (1/1)
+  community.general.snap:
+    name: '{{ item }}'
+    state: absent
+  loop: '{{ system_config_snapd_packages }}'

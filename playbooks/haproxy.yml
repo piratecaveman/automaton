@@ -1,0 +1,6 @@
+- name: Install HAProxy Load Balancer
+  hosts: kube-lb-1
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - load_balancer_hap

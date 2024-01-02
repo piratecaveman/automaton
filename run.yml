@@ -1,0 +1,7 @@
+- name: Pre-Init system configuration
+  ansible.builtin.import_playbook:
+    playbooks/system.yml
+
+- name: Setup HAProxy
+  ansible.builtin.import_playbook:
+    playbooks/haproxy.yml
