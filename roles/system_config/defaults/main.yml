@@ -4,6 +4,6 @@ system_config_kube_user_password: $6$JhFD/LMu9i6cEXEe$lODyKQ.zYHzin.67yMn/IZljTf
 # the order of the packages is important here
 system_config_snapd_packages: [
   lxd,
-  "core{{ ansible_distribution_major_version }}",
+  "core20",
   snapd
 ]

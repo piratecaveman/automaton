@@ -4,3 +4,6 @@ packages_names:
   - htop
   - net-tools
   - vim
+  - gpg
+  - curl
+  - ca-certificates
