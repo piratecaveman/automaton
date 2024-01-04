@@ -22,8 +22,6 @@
   notify: restart_crio
 
 - name: Ensure crio service
-  tags:
-    - crio
   block:
     - name: Get service status
       ansible.builtin.service_facts:

@@ -2,25 +2,25 @@
   block:
     - name: Gather keyrings dir stat
       ansible.builtin.stat:
-        path: '{{ kubeinit_common_keyring_path }}'
+        path: '{{ kubetools_keyring_path }}'
       register: keyring_dir
 
     - name: Create keyrings dir
       ansible.builtin.file:
-        path: '{{ kubeinit_common_keyring_path }}'
+        path: '{{ kubetools_keyring_path }}'
         state: directory
         mode: '0755'
       when: not keyring_dir.stat.exists
 
     - name: Add repository apt key for kubernetes
       ansible.builtin.apt_key:
-        url: '{{ kubeinit_common_k8s_key_url }}'
-        keyring: '{{ kubeinit_common_keyring_name }}'
+        url: '{{ kubetools_k8s_key_url }}'
+        keyring: '{{ kubetools_keyring_name }}'
         state: present
 
     - name: Create list file for k8s repository
       ansible.builtin.apt_repository:
-        repo: '{{ kubeinit_common_repo_str }}'
+        repo: '{{ kubetools_repo_str }}'
         state: present
         filename: kubernetes
         update_cache: true
@@ -29,7 +29,7 @@
   block:
     - name: Install kubernetes tools
       ansible.builtin.apt:
-        name: '{{ kubeinit_common_k8s_packages }}'
+        name: '{{ kubetools_k8s_packages }}'
         state: present
         update_cache: true
         cache_valid_time: 3600
@@ -38,4 +38,4 @@
       ansible.builtin.dpkg_selections:
         name: '{{ item }}'
         selection: hold
-      with_items: '{{ kubeinit_common_k8s_packages }}'
+      with_items: '{{ kubetools_k8s_packages }}'

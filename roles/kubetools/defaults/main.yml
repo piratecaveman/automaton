@@ -1,5 +1,5 @@
-kubeinit_common_k8s_key_url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
-kubeinit_common_keyring_path: /etc/apt/keyrings
-kubeinit_common_keyring_name: '{{ kubeinit_common_keyring_path }}/kubernetes-apt-keyring.gpg'
-kubeinit_common_repo_str: 'deb [signed-by={{ kubeinit_common_keyring_name }}] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /'
-kubeinit_common_k8s_packages: ["kubeadm", "kubelet", "kubectl"]
+kubetools_k8s_key_url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+kubetools_keyring_path: /etc/apt/keyrings
+kubetools_keyring_name: '{{ kubetools_keyring_path }}/kubernetes-apt-keyring.gpg'
+kubetools_repo_str: 'deb [signed-by={{ kubetools_keyring_name }}] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /'
+kubetools_k8s_packages: ["kubeadm", "kubelet", "kubectl"]

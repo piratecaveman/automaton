@@ -3,5 +3,5 @@
   become: true
   become_method: ansible.builtin.sudo
   roles:
-    - kubeinit_common
+    - kubetools
     - crio
