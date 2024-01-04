@@ -1,0 +1,5 @@
+crio_version: '1.29'
+crio_project_path: 'prerelease:/main'
+crio_keyring_url: 'https://pkgs.k8s.io/addons:/cri-o:/{{ crio_project_path }}/deb/Release.key'
+crio_keyring_path: '/etc/apt/keyrings/cri-o-apt-keyring.gpg'
+crio_repo_str: deb [signed-by={{ crio_keyring_path }}] https://pkgs.k8s.io/addons:/cri-o:/{{ crio_project_path }}/deb/ /

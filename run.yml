@@ -8,4 +8,4 @@
 
 - name: Create kubernetes cluster
   ansible.builtin.import_playbook:
-    playbooks/kubeinit_common.yml
+    playbooks/common.yml

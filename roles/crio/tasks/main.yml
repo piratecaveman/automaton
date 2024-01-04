@@ -1,0 +1,36 @@
+- name: Add repositories for cri-o
+  block:
+    - name: Add keyring for cri-o
+      ansible.builtin.apt_key:
+        url: '{{ crio_keyring_url }}'
+        keyring: '{{ crio_keyring_path }}'
+        state: present
+
+    - name: Add repository for cri-o
+      ansible.builtin.apt_repository:
+        repo: '{{ crio_repo_str }}'
+        filename: cri-o
+        state: present
+
+- name: Install packages for cri-o
+  ansible.builtin.apt:
+    name:
+      - cri-o
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  notify: restart_crio
+
+- name: Ensure crio service
+  tags:
+    - crio
+  block:
+    - name: Get service status
+      ansible.builtin.service_facts:
+
+    - name: Start crio
+      ansible.builtin.debug:
+        var: ansible_facts.services['crio.service']['state']
+      when: ansible_facts.services['crio.service']['state'] != "running"
+      notify: restart_crio
+      changed_when: ansible_facts.services['crio.service']['state'] != "running"
