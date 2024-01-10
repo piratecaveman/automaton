@@ -1,6 +1,7 @@
 - name: Initialize common components for k8s
   hosts: kubenet
   become: true
+  become_user: root
   become_method: ansible.builtin.sudo
   roles:
     - kubetools

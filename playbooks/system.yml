@@ -1,6 +1,7 @@
 - name: Pre Init Phase
   hosts: kubenet
   become: true
+  become_user: root
   become_method: ansible.builtin.sudo
   vars:
     kube_user: kube

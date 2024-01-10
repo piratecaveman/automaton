@@ -6,6 +6,10 @@
   ansible.builtin.import_playbook:
     playbooks/haproxy.yml
 
-- name: Create kubernetes cluster
+- name: Install kubernetes tools and runtimes
   ansible.builtin.import_playbook:
     playbooks/common.yml
+
+- name: Cluster init for kubernetes
+  ansible.builtin.import_playbook:
+    playbooks/cluster_init.yml

@@ -1,0 +1,94 @@
+- name: Detect k8s cluster init
+  block:
+    - name: Run kubectl cluster-info
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - cluster-info
+          - --kubeconfig
+          - '{{ kubeinit_admin_conf_path }}'
+      failed_when: false
+      changed_when: false
+      register: kubectl_cluster_info
+
+    - name: Register cluster-info
+      ansible.builtin.set_fact:
+        kubernetes_cluser_init: '{{ kubectl_cluster_info.rc == 0 | default(false) }}'
+
+- name: Run k8s cluster init
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - init
+      - --control-plane-endpoint
+      - '{{ kubeinit_lb_server }}:6443'
+      - --upload-certs
+  changed_when: false
+  register: kubeadm_init_output
+  when: not kubernetes_cluser_init
+
+- name: Configure kubectl for kube user
+  block:
+    - name: Ensure .kube
+      ansible.builtin.file:
+        path: '/home/{{ kube_user | default(kubeinit_kube_user) }}/.kube'
+        state: directory
+        mode: '0755'
+
+    - name: Copy admin.conf
+      ansible.builtin.copy:
+        dest: '/home/{{ kube_user | default(kubeinit_kube_user) }}/.kube/config'
+        src: '{{ kubeinit_admin_conf_path }}'
+        remote_src: true
+        mode: '0600'
+        owner: '{{ kube_user | default(kubeinit_kube_user) }}'
+        group: '{{ kube_user | default(kubeinit_kube_user) }}'
+
+- name: Install Calico
+  ansible.builtin.import_role:
+    name: calico
+  when: not kubernetes_cluser_init
+
+- name: Register minion join command
+  block:
+    - name: Generate minion join command
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - token
+          - create
+          - --print-join-command
+      changed_when: false
+      register: kubeinit_minion_join_command
+
+    - name: Register minion join command
+      ansible.builtin.set_fact:
+        kubeinit_minion_join_command: '{{ kubeinit_minion_join_command.stdout }}'
+      when: kubeinit_minion_join_command
+
+- name: Register controlplane join command
+  block:
+    - name: Generate a new certificate-key
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - certs
+          - certificate-key
+      changed_when: false
+      register: certificate_key
+
+    - name: Upload certs with new certificate-key
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - init
+          - phase
+          - upload-certs
+          - --upload-certs
+          - --certificate-key
+          - '{{ certificate_key.stdout }}'
+      changed_when: false
+
+    - name: Register controlplane join command
+      ansible.builtin.set_fact:
+        kubeinit_controlplane_join_command: '{{ kubeinit_minion_join_command }} --certificate-key {{ certificate_key.stdout }} --control-plane'

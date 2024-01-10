@@ -1,0 +1,7 @@
+calico_k8s_admin_conf_path: /etc/kubernetes/admin.conf
+calico_operator_url: >-
+  https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
+calico_operator_custom_resoures: >-
+  https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml
+calico_calicoctl_url: >-
+  https://github.com/projectcalico/calico/releases/download/v3.27.0/calicoctl-linux-amd64

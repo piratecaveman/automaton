@@ -1,0 +1,12 @@
+- name: Initialize kubernetes cluster
+  hosts: kube-control-1
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+  vars:
+    kube_user: kube
+  roles:
+    - kubeinit
+
+- name: Join worker nodes
+  hosts: workers

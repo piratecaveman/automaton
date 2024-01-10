@@ -1,0 +1,3 @@
+kubeinit_admin_conf_path: /etc/kubernetes/admin.conf
+kubeinit_lb_server: 'kube-lb-1.lxd'
+kubeinit_kube_user: kube

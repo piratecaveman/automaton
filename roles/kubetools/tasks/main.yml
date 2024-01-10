@@ -1,16 +1,10 @@
 - name: Add kubernetes repository
   block:
-    - name: Gather keyrings dir stat
-      ansible.builtin.stat:
-        path: '{{ kubetools_keyring_path }}'
-      register: keyring_dir
-
     - name: Create keyrings dir
       ansible.builtin.file:
         path: '{{ kubetools_keyring_path }}'
         state: directory
         mode: '0755'
-      when: not keyring_dir.stat.exists
 
     - name: Add repository apt key for kubernetes
       ansible.builtin.apt_key:

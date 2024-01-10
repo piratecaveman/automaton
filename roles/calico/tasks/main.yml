@@ -1,0 +1,42 @@
+- name: Detect Pod Networking
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - get
+      - ns
+      - tigera-operator
+      - --kubeconfig
+      - '{{ calico_k8s_admin_conf_path }}'
+  failed_when: false
+  changed_when: false
+  register: calico_podnetwork_status
+
+- name: Install calico operator
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - create
+      - -f
+      - '{{ calico_operator_url }}'
+      - --kubeconfig
+      - '{{ calico_k8s_admin_conf_path }}'
+  changed_when: false
+  when: calico_podnetwork_status.rc != 0
+
+- name: Install calico operator custom resources
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - create
+      - -f
+      - '{{ calico_operator_custom_resoures }}'
+      - --kubeconfig
+      - '{{ calico_k8s_admin_conf_path }}'
+  changed_when: false
+  when: calico_podnetwork_status.rc != 0
+
+- name: Install calicoctl
+  ansible.builtin.get_url:
+    url: '{{ calico_calicoctl_url }}'
+    dest: /usr/local/bin/calicoctl
+    mode: '0755'

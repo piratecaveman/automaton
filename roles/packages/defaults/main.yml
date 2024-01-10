@@ -7,3 +7,4 @@ packages_names:
   - gpg
   - curl
   - ca-certificates
+  - systemd-container
