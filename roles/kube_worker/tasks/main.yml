@@ -1,0 +1,14 @@
+- name: Detect healthz kubelet api
+  ansible.builtin.uri:
+    url: http://localhost:10248/healthz
+    method: GET
+    status_code:
+      - 200
+      - -1
+  register: healthz_response
+
+- name: Join as a worker
+  ansible.builtin.command:
+    cmd: '{{ hostvars["kube-control-1"]["kubeinit_minion_join_command"] }}'
+  changed_when: false
+  when: healthz_response.status != 200

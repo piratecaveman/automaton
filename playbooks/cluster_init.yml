@@ -8,5 +8,22 @@
   roles:
     - kubeinit
 
+- name: Join control-plane nodes
+  hosts: control,!kube-control-1
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+  vars:
+    kube_user: kube
+  roles:
+    - kube_control
+
 - name: Join worker nodes
   hosts: workers
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+  vars:
+    kube_user: kube
+  roles:
+    - kube_worker

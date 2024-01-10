@@ -1,0 +1,2 @@
+kube_control_admin_conf_path: /etc/kubernetes/admin.conf
+kube_control_kube_user: kube

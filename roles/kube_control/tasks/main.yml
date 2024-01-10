@@ -1,0 +1,33 @@
+- name: Get cluster-info
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - cluster-info
+      - --kubeconfig
+      - '{{ kube_control_admin_conf_path }}'
+  changed_when: false
+  failed_when: false
+  register: cluster_info_status
+
+- name: Join as a control-plane
+  ansible.builtin.command:
+    cmd: '{{ hostvars["kube-control-1"]["kubeinit_controlplane_join_command"] }}'
+  changed_when: false
+  when: cluster_info_status.rc != 0
+
+- name: Configure kubectl for kube user
+  block:
+    - name: Ensure .kube
+      ansible.builtin.file:
+        path: '/home/{{ kube_user | default(kube_control_kube_user) }}/.kube'
+        state: directory
+        mode: '0755'
+
+    - name: Copy admin.conf
+      ansible.builtin.copy:
+        dest: '/home/{{ kube_user | default(kube_control_kube_user) }}/.kube/config'
+        src: '{{ kube_control_admin_conf_path }}'
+        remote_src: true
+        mode: '0600'
+        owner: '{{ kube_user | default(kube_control_kube_user) }}'
+        group: '{{ kube_user | default(kube_control_kube_user) }}'
