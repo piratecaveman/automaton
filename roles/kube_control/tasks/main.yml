@@ -31,3 +31,9 @@
         mode: '0600'
         owner: '{{ kube_user | default(kube_control_kube_user) }}'
         group: '{{ kube_user | default(kube_control_kube_user) }}'
+
+- name: Install calicoctl
+  ansible.builtin.get_url:
+    url: '{{ kube_control_calicoctl_url }}'
+    dest: /usr/local/bin/calicoctl
+    mode: '0755'

@@ -83,3 +83,4 @@
     name: '{{ item }}'
     state: absent
   loop: '{{ system_config_snapd_packages }}'
+  failed_when: false

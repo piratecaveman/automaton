@@ -1,2 +1,4 @@
 kube_control_admin_conf_path: /etc/kubernetes/admin.conf
 kube_control_kube_user: kube
+kube_control_calicoctl_url: >-
+  https://github.com/projectcalico/calico/releases/download/v3.27.0/calicoctl-linux-amd64

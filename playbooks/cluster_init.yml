@@ -27,3 +27,11 @@
     kube_user: kube
   roles:
     - kube_worker
+
+- name: Create a Web Dashboard
+  hosts: kube-control-1
+  become: true
+  become_user: kube
+  become_method: ansible.builtin.sudo
+  roles:
+    - dashboard

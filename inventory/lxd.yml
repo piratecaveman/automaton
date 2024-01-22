@@ -1,6 +1,6 @@
 plugin: community.general.lxd
 type_filter: both
-url: unix:/var/lib/lxd/unix.socket
+url: unix:/var/lib/incus/unix.socket
 
 groupby:
   kubenet:

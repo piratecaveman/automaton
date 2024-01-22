@@ -1,0 +1,8 @@
+- name: Deploy dashboard on kubernetes
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - apply
+      - -f
+      - '{{ dashboard_url }}'
+  changed_when: false
