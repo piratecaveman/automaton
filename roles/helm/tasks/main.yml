@@ -1,0 +1,21 @@
+- name: Install helm via package
+  block:
+    - name: Add helm key
+      ansible.builtin.apt_key:
+        url: '{{ helm_key_url }}'
+        keyring: '{{ helm_key_path }}'
+        state: present
+
+    - name: Add helm repo
+      ansible.builtin.apt_repository:
+        repo: '{{ helm_repo_str }}'
+        filename: helm-stable-debian.list
+        state: present
+
+    - name: Install helm
+      ansible.builtin.apt:
+        name:
+          - helm
+        state: present
+        update_cache: true
+        cache_valid_time: 3600

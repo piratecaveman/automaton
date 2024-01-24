@@ -34,6 +34,12 @@
         selection: hold
       with_items: '{{ kubetools_k8s_packages }}'
 
+- name: Add alias for kubectl
+  ansible.builtin.lineinfile:
+    path: /home/kube/.bashrc
+    line: 'alias k=kubectl'
+    state: present
+
 - name: Update /etc/hosts
   ansible.builtin.template:
     src: hosts.j2
