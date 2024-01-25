@@ -84,3 +84,12 @@
     state: absent
   loop: '{{ system_config_snapd_packages }}'
   failed_when: false
+
+- name: Create bash-completion directory for kube user
+  ansible.builtin.file:
+    path: '/home/{{ kube_user | default(system_config_kube_user) }}/.local/share/bash-completion/completions'
+    owner: '{{ kube_user | default(system_config_kube_user) }}'
+    group: '{{ kube_user | default(system_config_kube_user) }}'
+    mode: '0755'
+    recurse: true
+    state: directory

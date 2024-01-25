@@ -8,3 +8,6 @@ packages_names:
   - curl
   - ca-certificates
   - systemd-container
+  - manpages
+  - man-db
+  - bash-completion

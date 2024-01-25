@@ -3,6 +3,8 @@
   become: true
   become_user: root
   become_method: ansible.builtin.sudo
+  vars:
+    kube_user: kube
   roles:
     - kubetools
     - crio

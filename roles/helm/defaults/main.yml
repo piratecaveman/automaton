@@ -2,3 +2,4 @@ helm_key_url: https://baltocdn.com/helm/signing.asc
 helm_key_path: /usr/share/keyrings/helm.gpg
 helm_architecture: amd64
 helm_repo_str: 'deb [arch={{ helm_architecture }} signed-by=/{{ helm_key_path }}] https://baltocdn.com/helm/stable/debian/ all main'
+helm_kube_user: kube

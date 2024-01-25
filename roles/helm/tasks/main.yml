@@ -19,3 +19,22 @@
         state: present
         update_cache: true
         cache_valid_time: 3600
+
+- name: Add completion for bash
+  block:
+    - name: Add completion for bash (1/2)
+      ansible.builtin.command:
+        argv:
+          - helm
+          - completion
+          - bash
+      register: helm_bash_completion
+      changed_when: false
+
+    - name: Add completion for bash (2/2)
+      ansible.builtin.copy:
+        dest: '/home/{{ kube_user | default(kubetools_kube_user) }}/.local/share/bash-completion/completions/helm'
+        mode: '0755'
+        owner: '{{ kube_user | default(helm_kube_user) }}'
+        group: '{{ kube_user | default(helm_kube_user) }}'
+        content: '{{ helm_bash_completion.stdout }}'

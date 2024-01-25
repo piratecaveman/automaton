@@ -15,6 +15,10 @@
       ansible.builtin.set_fact:
         kubernetes_cluser_init: '{{ kubectl_cluster_info.rc == 0 | default(false) }}'
 
+- name: Extract control plane IPs
+  ansible.builtin.set_fact:
+    control_plane_ips: "{{ groups['control'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
 - name: Run k8s cluster init
   ansible.builtin.command:
     argv:
@@ -23,6 +27,8 @@
       - --control-plane-endpoint
       - '{{ kubeinit_lb_server }}:6443'
       - --upload-certs
+      - --apiserver-cert-extra-sans
+      - '{{ control_plane_ips }}'
   changed_when: false
   register: kubeadm_init_output
   when: not kubernetes_cluser_init

@@ -3,3 +3,4 @@ kubetools_keyring_path: /etc/apt/keyrings
 kubetools_keyring_name: '{{ kubetools_keyring_path }}/kubernetes-apt-keyring.gpg'
 kubetools_repo_str: 'deb [signed-by={{ kubetools_keyring_name }}] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /'
 kubetools_k8s_packages: ["kubeadm", "kubelet", "kubectl"]
+kubetools_kube_user: kube
