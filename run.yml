@@ -13,3 +13,7 @@
 - name: Cluster init for kubernetes
   ansible.builtin.import_playbook:
     playbooks/cluster_init.yml
+
+- name: Cephadm
+  ansible.builtin.import_playbook:
+    playbooks/cephadm.yml

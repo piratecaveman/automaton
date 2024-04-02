@@ -1,0 +1,55 @@
+- name: Install cephadm
+  ansible.builtin.apt:
+    name:
+      - cephadm
+    state: present
+    cache_valid_time: 3600
+    install_recommends: true
+
+- name: Cephadm master init
+  when: cephadm_config == "master"
+  block:
+    - name: Bootstrap cephadm
+      ansible.builtin.command:
+        argv:
+          - cephadm
+          - bootstrap
+          - --mon-ip
+          - "{{ ansible_host }}"
+        creates: /etc/ceph/ceph.conf
+      register: cephadm_output
+
+    - name: Store cephadm ouput
+      ansible.builtin.copy:
+        dest: /tmp/ceph.log
+        mode: '0600'
+        owner: root
+        group: root
+        content: '{{ cephadm_output.stdout }}'
+      when: cephadm_output
+
+    - name: Install ceph tools
+      block:
+        - name: Add ceph repo
+          ansible.builtin.command:
+            argv:
+              - cephadm
+              - add-repo
+              - --release
+              - reef
+          changed_when: false
+
+        - name: Install ceph-common package
+          ansible.builtin.command:
+            argv:
+              - cephadm
+              - install
+              - ceph-common
+          changed_when: false
+
+- name: Cephadm node conifg
+  when: cephadm_config == "node"
+  block:
+    - name: I am debug
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}"

@@ -1,0 +1,51 @@
+- name: Determine home directory
+  ansible.builtin.shell:
+    cmd: >
+      set -o pipefail;
+      getent passwd '{{ interconnect_user }}' | cut -d: -f6
+    executable: /bin/bash
+  changed_when: false
+  register: user_home
+
+- name: Determine primary group
+  ansible.builtin.command:
+    argv:
+      - id
+      - --group
+      - --name
+      - '{{ interconnect_user }}'
+  changed_when: false
+  register: user_group
+
+- name: Ensure directory
+  ansible.builtin.file:
+    path: '{{ user_home.stdout }}/.ssh'
+    mode: '0711'
+    owner: '{{ interconnect_user }}'
+    group: '{{ user_group.stdout }}'
+    state: directory
+    force: true
+
+- name: Add to authorized_keys
+  ansible.posix.authorized_key:
+    user: '{{ interconnect_user }}'
+    key: '{{ ssh_public_key }}'
+    path: '{{ user_home.stdout }}/.ssh/config'
+    manage_dir: true
+    state: present
+
+- name: Create private key
+  ansible.builtin.copy:
+    dest: '{{ user_home.stdout }}/.ssh/{{ interconnect_key_name }}'
+    mode: '0400'
+    owner: '{{ interconnect_user }}'
+    group: '{{ user_group.stdout }}'
+    content: '{{ ssh_private_key }}'
+
+- name: Create public key
+  ansible.builtin.copy:
+    dest: '{{ user_home.stdout }}/.ssh/{{ interconnect_key_name }}.pub'
+    mode: '0644'
+    owner: '{{ interconnect_user }}'
+    group: '{{ user_group.stdout }}'
+    content: '{{ ssh_public_key }}'
