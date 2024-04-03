@@ -21,11 +21,12 @@
 
     - name: Store cephadm ouput
       ansible.builtin.copy:
-        dest: /tmp/ceph.log
+        dest: /var/log/ceph_init.log
         mode: '0600'
         owner: root
         group: root
         content: '{{ cephadm_output.stdout }}'
+        backup: true
       when: cephadm_output
 
     - name: Install ceph tools
@@ -46,6 +47,51 @@
               - install
               - ceph-common
           changed_when: false
+
+    - name: Ceph use custom ssh key
+      block:
+        - name: Set ceph public key
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - config-key
+              - set
+              - mgr/cephadm/ssh_identity_pub
+              - -i
+              - '{{ hostvars[inventory_hostname]["interconnect_ssh_public_key"] }}'
+          changed_when: false
+
+        - name: Set ceph private key
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - config-key
+              - set
+              - mgr/cephadm/ssh_identity_key
+              - -i
+              - '{{ hostvars[inventory_hostname]["interconnect_ssh_private_key"] }}'
+          changed_when: false
+
+        - name: Set ceph ssh user
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - cephadm
+              - set-user
+              - '{{ interconnect_username }}'
+          changed_when: false
+
+    - name: Add other nodes to ceph
+      ansible.builtin.command:
+        argv:
+          - ceph
+          - orch
+          - host
+          - add
+          - '{{ item }}'
+          - '{{ hostvars[item].ansible_host }}'
+      changed_when: false
+      with_items: '{{ groups["kubenet"] | difference(["kube-lb-1"]) | list }}'
 
 - name: Cephadm node conifg
   when: cephadm_config == "node"

@@ -1,3 +1,19 @@
+- name: Ensure user
+  ansible.builtin.user:
+    name: '{{ interconnect_user }}'
+    shell: /bin/bash
+    state: present
+    create_home: true
+
+- name: Setup sudo access for interconnect user
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/10_'{{ interconnect_user }}'
+    mode: '0644'
+    content: |
+      {{ interconnect_user }} ALL=(ALL) NOPASSWD: ALL
+    validate: 'visudo -cf %s'
+
+
 - name: Determine home directory
   ansible.builtin.shell:
     cmd: >
@@ -17,6 +33,14 @@
   changed_when: false
   register: user_group
 
+- name: Make facts available
+  ansible.builtin.set_fact:
+    interconnect_username: '{{ interconnect_user }}'
+    interconnect_groupname: '{{ user_group.stdout }}'
+    interconnect_home: '{{ user_home.stdout }}'
+    interconnect_ssh_private_key: '{{ user_home.stdout }}/.ssh/{{ interconnect_key_name }}'
+    interconnect_ssh_public_key: '{{ user_home.stdout }}/.ssh/{{ interconnect_key_name }}.pub'
+
 - name: Ensure directory
   ansible.builtin.file:
     path: '{{ user_home.stdout }}/.ssh'
@@ -30,9 +54,16 @@
   ansible.posix.authorized_key:
     user: '{{ interconnect_user }}'
     key: '{{ ssh_public_key }}'
-    path: '{{ user_home.stdout }}/.ssh/config'
     manage_dir: true
     state: present
+
+- name: Generate configuration
+  ansible.builtin.copy:
+    dest: '{{ user_home.stdout }}/.ssh/config'
+    mode: '0644'
+    owner: '{{ interconnect_user }}'
+    group: '{{ user_group.stdout }}'
+    src: config
 
 - name: Create private key
   ansible.builtin.copy:
