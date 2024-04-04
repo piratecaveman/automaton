@@ -81,6 +81,14 @@
               - '{{ interconnect_username }}'
           changed_when: false
 
+        - name: Restart mgr daemon to reload the config
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - mgr
+              - fail
+          changed_when: false
+
     - name: Add other nodes to ceph
       ansible.builtin.command:
         argv:

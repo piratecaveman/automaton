@@ -1,5 +1,11 @@
-.python-version
-.venv/
-.vscode/
-tmp/
-password
+**/**
+!ansible.cfg
+!run.yml
+!.gitignore
+
+!inventory/
+!inventory/**
+!playbooks/
+!playbooks/**
+!roles/
+!roles/**
