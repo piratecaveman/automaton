@@ -1,0 +1,62 @@
+- name: Preparation
+  block:
+    - name: Register kube-proxy config
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - get
+          - configmap
+          - kube-proxy
+          - --namespace
+          - kube-system
+          - --output
+          - yaml
+      changed_when: false
+      register: kube_proxy_config
+
+    - name: Current config yml
+      ansible.builtin.copy:
+        content: '{{ kube_proxy_config.stdout }}'
+        dest: /tmp/configmap.yml
+        mode: '0644'
+
+    - name: Set strictARP to true
+      ansible.builtin.command:
+        argv:
+          - sed
+          - -i
+          - 's|strictARP: false|strictARP: true|g'
+          - /tmp/configmap.yml
+      changed_when: false
+
+    - name: Apply configmap
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - --namespace
+          - kube-system
+          - apply
+          - --filename
+          - /tmp/configmap.yml
+      changed_when: false
+
+- name: Install MetalLB
+  block:
+    - name: Add MetalLB repo
+      changed_when: false
+      ansible.builtin.command:
+        argv:
+          - helm
+          - repo
+          - add
+          - metallb
+          - 'https://metallb.github.io/metallb'
+
+    - name: Install metallb
+      changed_when: false
+      ansible.builtin.command:
+        argv:
+          - helm
+          - install
+          - metallb
+          - metallb/metallb

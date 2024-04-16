@@ -1,0 +1,2 @@
+operator_framework_version: 'v0.27.0'
+operator_framework_url: 'https://github.com/operator-framework/operator-lifecycle-manager/releases/download/{{ operator_framework_version }}/install.sh'

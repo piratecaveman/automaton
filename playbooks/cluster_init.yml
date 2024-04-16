@@ -29,3 +29,30 @@
     kube_user: kube
   roles:
     - kube_worker
+
+- name: Create kube config on local machine
+  hosts: kube-control-1
+  tags: run
+  tasks:
+    - name: Ensure directory
+      delegate_to: localhost
+      ansible.builtin.file:
+        path: '~/.kube'
+        mode: '0700'
+        state: directory
+
+    - name: Fetch config file
+      become: true
+      become_user: root
+      become_method: ansible.builtin.sudo
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: '~/.kube/config'
+        flat: true
+
+    - name: Ensure proper permissions
+      delegate_to: localhost
+      ansible.builtin.file:
+        path: '~/.kube/config'
+        state: file
+        mode: '0600'

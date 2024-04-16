@@ -1,0 +1,27 @@
+cilium_version: '1.15.4'
+cilium_cli_version: v0.16.4
+cilium_arch: amd64
+cilium_version_url: https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt
+_cilium_package_url: [
+  "https://github.com/cilium/cilium-cli/releases/download/",
+  '{{ cilium_cli_version }}',
+  "/cilium-linux-",
+  '{{ cilium_arch }}',
+  ".tar.gz"
+]
+
+cilium_package_url: '{{ _cilium_package_url | join("") }}'
+cilium_package_checksum_url: '{{ cilium_package_url }}.sha256sum'
+
+# hubble
+cilium_hubble_version: v0.13.2
+cilium_hubble_version_url: https://raw.githubusercontent.com/cilium/hubble/master/stable.txt
+_cilium_hubble_client_url: [
+  "https://github.com/cilium/hubble/releases/download/",
+  '{{ cilium_hubble_version }}',
+  /hubble-linux-,
+  '{{ clilium_arch }}',
+  .tar.gz
+]
+cilium_hubble_client_url: '{{ _cilium_hubble_package_url | join("") }}'
+cilium_hubble_client_checksum_url: '{{ cilium_hubble_client_url }}.sha256sum'

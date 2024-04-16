@@ -1,0 +1,53 @@
+- name: Install cilium-cli
+  block:
+    - name: Download package
+      ansible.builtin.get_url:
+        url: '{{ cilium_package_url }}'
+        dest: /tmp/cilium-linux-{{ cilium_arch }}.tar.gz
+        mode: '0755'
+        checksum: 'sha256:{{ cilium_package_checksum_url }}'
+
+    - name: Extract cilium-cli
+      ansible.builtin.unarchive:
+        src: /tmp/cilium-linux-{{ cilium_arch }}.tar.gz
+        dest: /usr/local/bin/
+        remote_src: true
+        mode: '0755'
+
+- name: Install cilium to k8s
+  become: true
+  become_user: kube
+  become_method: ansible.builtin.sudo
+  block:
+    - name: Install cilium
+      ansible.builtin.command:
+        argv:
+          - cilium
+          - install
+          - --version
+          - '{{ cilium_version }}'
+      changed_when: false
+
+    - name: Enable hubble monitoring
+      ansible.builtin.command:
+        argv:
+          - cilium
+          - hubble
+          - enable
+      changed_when: false
+
+- name: Install hubble client
+  block:
+    - name: Download package
+      ansible.builtin.get_url:
+        url: '{{ cilium_hubble_client_url }}'
+        dest: /tmp/hubble-linux-{{ cilium_arch }}.tar.gz
+        mode: '0755'
+        checksum: 'sha256:{{ cilium_hubble_client_checksum_url }}'
+
+    - name: Extract cilium-cli
+      ansible.builtin.unarchive:
+        src: /tmp/hubble-linux-{{ cilium_arch }}.tar.gz
+        dest: /usr/local/bin/
+        remote_src: true
+        mode: '0755'

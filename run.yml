@@ -14,6 +14,18 @@
   ansible.builtin.import_playbook:
     playbooks/cluster_init.yml
 
-- name: Cephadm
-  ansible.builtin.import_playbook:
-    playbooks/cephadm.yml
+# - name: Cephadm
+#   ansible.builtin.import_playbook:
+#     playbooks/cephadm.yml
+
+# - name: Openebs
+#   ansible.builtin.import_playbook:
+#     playbooks/openebs.yml
+
+# - name: Install Operator Framework
+#   ansible.builtin.import_playbook:
+#     playbooks/operator.yml
+
+# - name: MetalLB
+#   ansible.builtin.import_playbook:
+#     playbooks/metallb.yml

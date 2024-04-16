@@ -1,0 +1,7 @@
+- name: Install iscsi initiator
+  ansible.builtin.apt:
+    name:
+      - open-iscsi
+    state: present
+    cache_valid_time: 3600
+    install_recommends: true
