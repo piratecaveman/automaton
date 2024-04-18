@@ -1,53 +1,31 @@
-- name: Install cilium-cli
+- name: Install Cilium
   block:
-    - name: Download package
-      ansible.builtin.get_url:
-        url: '{{ cilium_package_url }}'
-        dest: /tmp/cilium-linux-{{ cilium_arch }}.tar.gz
-        mode: '0755'
-        checksum: 'sha256:{{ cilium_package_checksum_url }}'
+    - name: Detect cilium installation
+      ansible.builtin.stat:
+        path: '{{ cilium_install_path }}/cilium'
+      register: cilium_binary_presence
 
-    - name: Extract cilium-cli
-      ansible.builtin.unarchive:
-        src: /tmp/cilium-linux-{{ cilium_arch }}.tar.gz
-        dest: /usr/local/bin/
-        remote_src: true
-        mode: '0755'
+    - name: Install Cilium
+      when: not cilium_binary_presence.stat.exists
+      block:
+        - name: Download cilium package
+          ansible.builtin.get_url:
+            url: '{{ cilium_tar_url }}'
+            dest: '/tmp/{{ cilium_tar_name }}'
+            mode: '0644'
+            checksum: 'sha256:{{ cilium_tar_checksum_url }}'
 
-- name: Install cilium to k8s
-  become: true
-  become_user: kube
-  become_method: ansible.builtin.sudo
+        - name: Extract cilium package
+          become: true
+          become_user: root
+          become_method: ansible.builtin.sudo
+          ansible.builtin.unarchive:
+            src: '/tmp/{{ cilium_tar_name }}'
+            dest: '{{ cilium_install_path }}'
+            remote_src: true
+
+- name: Install hubble
   block:
-    - name: Install cilium
-      ansible.builtin.command:
-        argv:
-          - cilium
-          - install
-          - --version
-          - '{{ cilium_version }}'
-      changed_when: false
-
-    - name: Enable hubble monitoring
-      ansible.builtin.command:
-        argv:
-          - cilium
-          - hubble
-          - enable
-      changed_when: false
-
-- name: Install hubble client
-  block:
-    - name: Download package
-      ansible.builtin.get_url:
-        url: '{{ cilium_hubble_client_url }}'
-        dest: /tmp/hubble-linux-{{ cilium_arch }}.tar.gz
-        mode: '0755'
-        checksum: 'sha256:{{ cilium_hubble_client_checksum_url }}'
-
-    - name: Extract cilium-cli
-      ansible.builtin.unarchive:
-        src: /tmp/hubble-linux-{{ cilium_arch }}.tar.gz
-        dest: /usr/local/bin/
-        remote_src: true
-        mode: '0755'
+    - name: Debug
+      ansible.builtin.debug:
+        var: cilium_hubble
