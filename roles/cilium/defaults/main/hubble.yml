@@ -1,1 +1,11 @@
-cilium_hubble: xyzzy
+cilium_hubble_install_path: /usr/local/bin
+cilium_hubble_version_url: https://raw.githubusercontent.com/cilium/hubble/master/stable.txt
+cilium_hubble_version: '{{ "v0.13.3" | default(lookup("ansible.builtin.url", cilium_hubble_version_url)) }}'
+cilium_hubble_arch: amd64
+cilium_hubble_tar_name: 'hubble-linux-{{ cilium_hubble_arch }}.tar.gz'
+_cilium_hubble_tar_url: [
+  "https://github.com/cilium/hubble/releases/download/{{ cilium_hubble_version }}",
+  "/{{ cilium_hubble_tar_name }}"
+]
+cilium_hubble_tar_url: '{{ _cilium_hubble_tar_url | join("") }}'
+cilium_hubble_tar_checksum_url: '{{ cilium_hubble_tar_url }}.sha256sum'

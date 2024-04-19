@@ -1,5 +1,5 @@
-cilium_version_url: 'https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt'
-cilium_version: '{{ "v0.16.4" | default(lookup("ansible.builtin.url", cilium_version_url)) }}'
+cilium_cli_version_url: 'https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt'
+cilium_cli_version: '{{ "v0.16.4" | default(lookup("ansible.builtin.url", cilium_cli_version_url)) }}'
 cilium_arch: amd64
 cilium_tar_name: 'cilium-linux-{{ cilium_arch }}.tar.gz'
 _cilium_url: [
@@ -9,3 +9,4 @@ _cilium_url: [
 cilium_tar_url: '{{ _cilium_url | join("") }}'
 cilium_tar_checksum_url: '{{ cilium_tar_url }}.sha256sum'
 cilium_install_path: '/usr/local/bin'
+cilium_version: '1.15.4'

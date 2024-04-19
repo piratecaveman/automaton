@@ -24,8 +24,38 @@
             dest: '{{ cilium_install_path }}'
             remote_src: true
 
+    - name: Detect and Install Cilium
+      when: inventory_hostname == 'kube-control-1'
+      become: true
+      become_user: kube
+      become_method: ansible.builtin.sudo
+      block:
+        - name: Detect cilium
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - version
+          register: cilium_installed_version
+          changed_when: false
+
+        - name: Install cilium
+          when: '"cilium image" not in cilium_installed_version.stdout'
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - install
+              - --version
+              - '{{ cilium_version }}'
+          changed_when: false
+
+        - name: Validate the install
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - status
+              - --wait
+          changed_when: false
+
 - name: Install hubble
-  block:
-    - name: Debug
-      ansible.builtin.debug:
-        var: cilium_hubble
+  ansible.builtin.import_tasks:
+    file: tasks/hubble.yml

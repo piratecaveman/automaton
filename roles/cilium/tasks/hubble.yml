@@ -1,0 +1,39 @@
+- name: Enable hubble in cilium-cli
+  become: true
+  become_user: kube
+  become_method: ansible.builtin.sudo
+  when: inventory_hostname == 'kube-control-1'
+  ansible.builtin.command:
+    argv:
+      - cilium
+      - hubble
+      - enable
+  changed_when: false
+
+- name: Install hubble
+  when: inventory_hostname == 'kube-control-1'
+  block:
+    - name: Detect hubble presence
+      ansible.builtin.stat:
+        path: '{{ cilium_hubble_install_path }}/hubble'
+      register: hubble_client_presence
+
+    - name: Download and Install Hubble client
+      when: not hubble_client_presence.stat.exists
+      block:
+        - name: Download hubble client tar
+          ansible.builtin.get_url:
+            url: '{{ cilium_hubble_tar_url }}'
+            dest: '/tmp/{{ cilium_hubble_tar_name }}'
+            mode: '0644'
+            checksum: 'sha256:{{ cilium_hubble_tar_checksum_url }}'
+
+        - name: Extract and Install hubble client
+          become: true
+          become_user: root
+          become_method: ansible.builtin.sudo
+          ansible.builtin.unarchive:
+            src: '/tmp/{{ cilium_hubble_tar_name }}'
+            dest: '{{ cilium_hubble_install_path }}'
+            mode: '0755'
+            remote_src: true
