@@ -1,0 +1,13 @@
+- name: Get Operator Framework Installer
+  ansible.builtin.get_url:
+    url: '{{ operator_framework_url }}'
+    dest: /tmp/install.sh
+    mode: '0755'
+
+- name: Run installer
+  ansible.builtin.command:
+    argv:
+      - bash
+      - /tmp/install.sh
+      - '{{ operator_framework_version }}'
+  changed_when: false

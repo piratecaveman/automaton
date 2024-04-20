@@ -1,0 +1,8 @@
+- name: Install cilium
+  hosts: kubenet
+  roles:
+    - role: cilium
+      cilium_cli_version: '{{
+          lookup("ansible.builtin.url",
+          "https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt")
+        }}'

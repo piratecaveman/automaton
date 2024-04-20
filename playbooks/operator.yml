@@ -1,0 +1,8 @@
+- name: Install operator framework
+  hosts: kube-control-1
+  become: true
+  become_user: kube
+  become_method: ansible.builtin.sudo
+  roles:
+    - role: operator
+      operator_framework_version: v0.27.0

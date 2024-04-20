@@ -13,3 +13,6 @@ packages_names:
   - bash-completion
   - lvm2
   - foot-terminfo
+  - jq
+  - strace
+  - psmisc

@@ -50,9 +50,9 @@
         owner: '{{ kube_user | default(kubeinit_kube_user) }}'
         group: '{{ kube_user | default(kubeinit_kube_user) }}'
 
-- name: Install Calico
+- name: Install Cilium
   ansible.builtin.import_role:
-    name: calico
+    name: cilium
   when: not kubernetes_cluser_init
 
 - name: Register minion join command

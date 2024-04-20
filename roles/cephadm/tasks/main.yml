@@ -1,0 +1,109 @@
+- name: Install cephadm
+  ansible.builtin.apt:
+    name:
+      - cephadm
+    state: present
+    cache_valid_time: 3600
+    install_recommends: true
+
+- name: Cephadm master init
+  when: cephadm_config == "master"
+  block:
+    - name: Bootstrap cephadm
+      ansible.builtin.command:
+        argv:
+          - cephadm
+          - bootstrap
+          - --mon-ip
+          - "{{ ansible_host }}"
+        creates: /etc/ceph/ceph.conf
+      register: cephadm_output
+
+    - name: Store cephadm ouput
+      ansible.builtin.copy:
+        dest: /var/log/ceph_init.log
+        mode: '0600'
+        owner: root
+        group: root
+        content: '{{ cephadm_output.stdout }}'
+        backup: true
+      when: cephadm_output
+
+    - name: Install ceph tools
+      block:
+        - name: Add ceph repo
+          ansible.builtin.command:
+            argv:
+              - cephadm
+              - add-repo
+              - --release
+              - reef
+          changed_when: false
+
+        - name: Install ceph-common package
+          ansible.builtin.command:
+            argv:
+              - cephadm
+              - install
+              - ceph-common
+          changed_when: false
+
+    - name: Ceph use custom ssh key
+      block:
+        - name: Set ceph public key
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - config-key
+              - set
+              - mgr/cephadm/ssh_identity_pub
+              - -i
+              - '{{ hostvars[inventory_hostname]["interconnect_ssh_public_key"] }}'
+          changed_when: false
+
+        - name: Set ceph private key
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - config-key
+              - set
+              - mgr/cephadm/ssh_identity_key
+              - -i
+              - '{{ hostvars[inventory_hostname]["interconnect_ssh_private_key"] }}'
+          changed_when: false
+
+        - name: Set ceph ssh user
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - cephadm
+              - set-user
+              - '{{ interconnect_username }}'
+          changed_when: false
+
+        - name: Restart mgr daemon to reload the config
+          ansible.builtin.command:
+            argv:
+              - ceph
+              - mgr
+              - fail
+          changed_when: false
+
+    - name: Add other nodes to ceph
+      ansible.builtin.command:
+        argv:
+          - ceph
+          - orch
+          - host
+          - add
+          - '{{ item }}'
+          - '{{ hostvars[item].ansible_host }}'
+      changed_when: false
+      with_items: '{{ groups["kubenet"] | difference(["kube-lb-1"]) | list }}'
+
+- name: Cephadm node conifg
+  when: cephadm_config == "node"
+  block:
+    - name: I am debug
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}"

@@ -1,0 +1,11 @@
+- name: Cephadm
+  hosts: kubenet
+  become: true
+  become_user: root
+  become_method: ansible.builtin.sudo
+  roles:
+    - role: interconnect
+      interconnect_user: cephuser
+      interconnect_key_name: id_rsa
+    - role: cephadm
+      cephadm_config: '{{ "master" if inventory_hostname == "kube-lb-1" else "node" }}'

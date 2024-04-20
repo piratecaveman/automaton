@@ -1,0 +1,7 @@
+- name: OpenEBS
+  hosts: kubenet
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: root
+  roles:
+    - role: openebs

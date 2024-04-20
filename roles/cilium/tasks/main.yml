@@ -1,0 +1,61 @@
+- name: Install Cilium
+  block:
+    - name: Detect cilium installation
+      ansible.builtin.stat:
+        path: '{{ cilium_install_path }}/cilium'
+      register: cilium_binary_presence
+
+    - name: Install Cilium
+      when: not cilium_binary_presence.stat.exists
+      block:
+        - name: Download cilium package
+          ansible.builtin.get_url:
+            url: '{{ cilium_tar_url }}'
+            dest: '/tmp/{{ cilium_tar_name }}'
+            mode: '0644'
+            checksum: 'sha256:{{ cilium_tar_checksum_url }}'
+
+        - name: Extract cilium package
+          become: true
+          become_user: root
+          become_method: ansible.builtin.sudo
+          ansible.builtin.unarchive:
+            src: '/tmp/{{ cilium_tar_name }}'
+            dest: '{{ cilium_install_path }}'
+            remote_src: true
+
+    - name: Detect and Install Cilium
+      when: inventory_hostname == 'kube-control-1'
+      become: true
+      become_user: kube
+      become_method: ansible.builtin.sudo
+      block:
+        - name: Detect cilium
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - version
+          register: cilium_installed_version
+          changed_when: false
+
+        - name: Install cilium
+          when: '"cilium image" not in cilium_installed_version.stdout'
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - install
+              - --version
+              - '{{ cilium_version }}'
+          changed_when: false
+
+        - name: Validate the install
+          ansible.builtin.command:
+            argv:
+              - cilium
+              - status
+              - --wait
+          changed_when: false
+
+- name: Install hubble
+  ansible.builtin.import_tasks:
+    file: tasks/hubble.yml
