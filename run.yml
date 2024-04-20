@@ -26,6 +26,6 @@
 #   ansible.builtin.import_playbook:
 #     playbooks/operator.yml
 
-# - name: MetalLB
-#   ansible.builtin.import_playbook:
-#     playbooks/metallb.yml
+- name: MetalLB
+  ansible.builtin.import_playbook:
+    playbooks/metallb.yml

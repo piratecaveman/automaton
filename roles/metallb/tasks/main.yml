@@ -1,4 +1,7 @@
 - name: Preparation
+  become: true
+  become_user: kube
+  become_method: ansible.builtin.sudo
   block:
     - name: Register kube-proxy config
       ansible.builtin.command:
