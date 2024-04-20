@@ -11,3 +11,5 @@ packages_names:
   - manpages
   - man-db
   - bash-completion
+  - lvm2
+  - foot-terminfo
