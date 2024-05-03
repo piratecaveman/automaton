@@ -42,6 +42,12 @@
 
 - name: Install MetalLB
   block:
+    - name: Create values file
+      ansible.builtin.copy:
+        dest: /tmp/metallb-values.yml
+        mode: '0644'
+        src: values.yml
+
     - name: Add MetalLB repo
       changed_when: false
       ansible.builtin.command:
@@ -60,3 +66,8 @@
           - install
           - metallb
           - metallb/metallb
+          - --namespace
+          - metallb-system
+          - --create-namespace
+          - --values
+          - /tmp/metallb-values.yml

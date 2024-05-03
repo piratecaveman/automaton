@@ -39,7 +39,7 @@
           changed_when: false
 
         - name: Install cilium
-          when: '"cilium image" not in cilium_installed_version.stdout'
+          when: '"cilium image (running): unknown" in cilium_installed_version.stdout'
           ansible.builtin.command:
             argv:
               - cilium

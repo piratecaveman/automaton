@@ -53,7 +53,6 @@
 - name: Install Cilium
   ansible.builtin.import_role:
     name: cilium
-  when: not kubernetes_cluser_init
 
 - name: Register minion join command
   block:

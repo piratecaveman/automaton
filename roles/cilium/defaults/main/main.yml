@@ -3,7 +3,7 @@ cilium_cli_version: '{{ "v0.16.4" | default(lookup("ansible.builtin.url", cilium
 cilium_arch: amd64
 cilium_tar_name: 'cilium-linux-{{ cilium_arch }}.tar.gz'
 _cilium_url: [
-  "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_version }}",
+  "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}",
   "/{{ cilium_tar_name }}"
 ]
 cilium_tar_url: '{{ _cilium_url | join("") }}'
