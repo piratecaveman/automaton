@@ -4,4 +4,4 @@
   become_user: root
   become_method: ansible.builtin.sudo
   roles:
-    - load_balancer_hap
+    - role: load_balancer_hap
