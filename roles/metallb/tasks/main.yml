@@ -2,6 +2,7 @@
   become: true
   become_user: kube
   become_method: ansible.builtin.sudo
+  tags: metallb
   block:
     - name: Register kube-proxy config
       ansible.builtin.command:
@@ -43,34 +44,83 @@
           - /tmp/configmap.yml
       changed_when: false
 
-- name: Install MetalLB
-  block:
-    - name: Create values file
-      ansible.builtin.copy:
-        dest: /tmp/metallb-values.yml
-        mode: '0644'
-        src: values.yml
+    - name: Install MetalLB
+      block:
+        - name: Create values file
+          ansible.builtin.copy:
+            dest: /tmp/metallb-values.yml
+            mode: '0644'
+            src: values.yml
 
-    - name: Add MetalLB repo
-      changed_when: false
-      ansible.builtin.command:
-        argv:
-          - helm
-          - repo
-          - add
-          - metallb
-          - 'https://metallb.github.io/metallb'
+        - name: Add MetalLB repo
+          changed_when: false
+          ansible.builtin.command:
+            argv:
+              - helm
+              - repo
+              - add
+              - metallb
+              - 'https://metallb.github.io/metallb'
 
-    - name: Install metallb
-      changed_when: false
-      ansible.builtin.command:
-        argv:
-          - helm
-          - install
-          - metallb
-          - metallb/metallb
-          - --namespace
-          - metallb-system
-          - --create-namespace
-          - --values
-          - /tmp/metallb-values.yml
+        - name: Detect Installation
+          ansible.builtin.command:
+            argv:
+              - helm
+              - list
+              - --namespace
+              - metallb-system
+              - -o
+              - yaml
+          changed_when: false
+          register: metallb_status
+
+        - name: Install metallb
+          when: (not (metallb_status.stdout | from_yaml | length > 0)) or (metallb_status.stdout | from_yaml)[0].status != "deployed"
+          changed_when: false
+          ansible.builtin.command:
+            argv:
+              - helm
+              - install
+              - metallb
+              - metallb/metallb
+              - --namespace
+              - metallb-system
+              - --create-namespace
+              - --values
+              - /tmp/metallb-values.yml
+
+    - name: Configure IPAdress pool and L2Advertisement for metallb
+      block:
+        - name: Register user detaails
+          ansible.builtin.user:
+            name: kube
+            state: present
+          register: kube_user_stats
+          check_mode: true
+
+        - name: Ensure directory for config files
+          ansible.builtin.file:
+            path: '{{ kube_user_stats.home }}/metallb'
+            state: directory
+            mode: '0755'
+
+        - name: Copy config files
+          ansible.builtin.copy:
+            dest: '{{ kube_user_stats.home }}/metallb'
+            src: "{{ item }}"
+            mode: '0644'
+          with_items:
+            - private-ip-pool.yml
+            - private-l2advt.yml
+
+        - name: Apply config to kubernets
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - apply
+              - --filename
+              - '{{ kube_user_stats.home }}/metallb/{{ item }}'
+          changed_when: false
+          with_items:
+            - private-ip-pool.yml
+            - private-l2advt.yml
